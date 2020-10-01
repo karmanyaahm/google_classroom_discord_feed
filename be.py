@@ -2,6 +2,8 @@ from flask import Flask, request
 import webhook
 import quickstart
 from db import dbHelper, create
+import json
+from base64 import b64decode
 
 app = Flask(__name__)
 # with app.app_context():
@@ -13,6 +15,7 @@ db = dbHelper(app)
 def pubsub():
     data = request.json
     print(data)
+    data = json.loads(b64decode(data['message']['data']))
     d = quickstart.return_details_from_request(data, db)
     to = db.find_connection_by_class_id(classId=data["resourceId"]["courseId"]).get_webhook_url()
     webhook.received_stuff(to,d, status=data["eventType"])
