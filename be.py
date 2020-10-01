@@ -19,4 +19,4 @@ def pubsub():
     return "", 200
 
 
-# app.run(debug=False)
+app.run(debug=False,port = 50005)

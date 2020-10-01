@@ -4,8 +4,7 @@ from stringcase import titlecase
 def send(title, desc, status, workType, points=0, url=None):
     workType = titlecase(workType.lower())
     status = titlecase(status.lower())
-    url = webhook_url
-
+    
     embed = {
         "color": 3447003,
         "title": status + " - " + workType + " " + title,

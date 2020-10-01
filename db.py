@@ -21,7 +21,7 @@ class Connection(db.Model):
     webhookId = Column(String(50))
     webhookToken = Column(String(120))
     def get_webhook_url(self):
-        return f"https://discordapp.com/api/webhooks/{webhookId}/{webhookToken}"
+        return f"https://discordapp.com/api/webhooks/{self.webhookId}/{self.webhookToken}"
 
     def __repr__(self):
         return "<Connection %r>" % self.classId
