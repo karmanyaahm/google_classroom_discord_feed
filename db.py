@@ -8,10 +8,10 @@ db = SQLAlchemy()
 
 class User(db.Model):
     uid = Column(Integer, primary_key=True)
-    token = Column("token", PickleType)
+    token = Column("token", PickleType(protocol=4))
 
     def __repr__(self):
-        return "<User %r>" % self.name
+        return "<User %r>" % self.uid
 
 
 class Connection(db.Model):
@@ -20,6 +20,8 @@ class Connection(db.Model):
     classId = Column(String(50), primary_key=True)
     webhookId = Column(String(50))
     webhookToken = Column(String(120))
+    def get_webhook_url(self):
+        return f"https://discordapp.com/api/webhooks/{webhookId}/{webhookToken}"
 
     def __repr__(self):
         return "<Connection %r>" % self.classId
@@ -53,5 +55,3 @@ class dbHelper:
 
     def find_user_by_id(self, id):
         return User.query.filter_by(uid=id).first()
-
-

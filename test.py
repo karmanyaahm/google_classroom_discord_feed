@@ -11,4 +11,5 @@ data = {
 }
 
 
-r=requests.post("http://localhost:5000/goog", json=data)
+#r=requests.post("http://localhost:5000/goog", json=data)
+r=requests.post("http://communication-bot.karmanyaah.malhotra.cc:42169/goog", json=data)

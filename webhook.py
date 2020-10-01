@@ -1,6 +1,5 @@
 import requests
 from stringcase import titlecase
-from secret import webhook_url
 
 def send(title, desc, status, workType, points=0, url=None):
     workType = titlecase(workType.lower())
