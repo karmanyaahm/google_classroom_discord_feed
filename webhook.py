@@ -29,7 +29,7 @@ def send(to,title, desc, status, workType, points=0, url=None):
 
     print(requests.post(to, json=data).text)
 
-def send(to,c):    
+def send_raw(to,c):    
     data = {
         "content": c,
         "username": "Google Classroom Bot",
