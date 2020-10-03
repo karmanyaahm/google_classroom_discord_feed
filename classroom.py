@@ -66,3 +66,6 @@ class Classroom:
             .get(courseId=courseId, id=thingId)
             .execute()
         )
+
+    def get_courses(self):
+        return self.service.courses().list().execute()["courses"]

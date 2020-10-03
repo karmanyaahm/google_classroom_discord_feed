@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, PickleType, DateTime, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-
+from secret import sqlurl
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -33,7 +33,7 @@ class Connection(db.Model):
 
 
 def create(app):
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tmp.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = sqlurl
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
     with app.app_context():
@@ -45,7 +45,7 @@ class dbHelper:
     db = db
 
     def __init__(self, app):
-        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tmp.db"
+        app.config["SQLALCHEMY_DATABASE_URI"] = sqlurl
 
         app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
         self.db.init_app(app)
@@ -53,6 +53,11 @@ class dbHelper:
     def add(self, o):
         session = self.db.session  ###!!!!!!!! maybe self.db here
         session.add(o)
+        session.commit()
+
+    def delete(self, o):
+        session = self.db.session  ###!!!!!!!! maybe self.db here
+        session.delete(o)
         session.commit()
 
     def find_connection_by_class_id(self, classId):

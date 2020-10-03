@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>Edit things</title>
+  </head>
+
+  <body>
+    <form method="post">
+      <table>
+        <tr>
+          <th>name</th>
+          <th>id</th>
+          <th>url</th>
+          <th>delete</th>
+        </tr>
+        {% for class in classes%}
+        <tr>
+          <td>{{class.name}}</td>
+          <td>{{class.id}}</td>
+          <td>
+            <input
+              type="text"
+              name="url-{{class.id}}"
+              size="60"
+              value="{{class.webhook}}"
+            />
+          </td>
+          <td>
+            {%if class.webhook%}
+            <input type="checkbox" name="delete-{{class.id}}" />{%endif%}
+          </td>
+        </tr>
+
+        {%endfor%}
+      </table>
+      <input type="submit" value="Submit" />
+    </form>
+  </body>
+</html>
