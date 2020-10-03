@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, PickleType, create_engine
+from sqlalchemy import Column, Integer, String, PickleType, DateTime, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
 from flask_sqlalchemy import SQLAlchemy
@@ -20,8 +20,13 @@ class Connection(db.Model):
     classId = Column(String(50), primary_key=True)
     webhookId = Column(String(50))
     webhookToken = Column(String(120))
+    registration = Column(String(50))
+    expire = Column(DateTime)
+
     def get_webhook_url(self):
-        return f"https://discordapp.com/api/webhooks/{self.webhookId}/{self.webhookToken}"
+        return (
+            f"https://discordapp.com/api/webhooks/{self.webhookId}/{self.webhookToken}"
+        )
 
     def __repr__(self):
         return "<Connection %r>" % self.classId

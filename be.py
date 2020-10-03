@@ -1,7 +1,7 @@
 from flask import Flask, request
 import googleapiclient.errors
 import webhook
-import quickstart
+import classroom
 from db import dbHelper, create
 import json
 from base64 import b64decode
@@ -22,7 +22,7 @@ def pubsub():
     ).get_webhook_url()
 
     try:
-        d = quickstart.return_details_from_request(data, db)
+        d = classroom.return_details_from_request(data, db)
     except googleapiclient.errors.HttpError:
         webhook.send_raw(to, "Some update but 404 happened check classroom manually")
         return "", 200
