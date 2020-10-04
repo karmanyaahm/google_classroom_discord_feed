@@ -28,8 +28,7 @@ def get_creds(uid, db):
     return creds
 
 
-def return_details_from_request(r, db):
-    room = Classroom.from_classId(r["resourceId"]["courseId"], db)
+def return_details_from_request(r, db,room):
     return room.get_courseWork(
         courseId=r["resourceId"]["courseId"], thingId=r["resourceId"]["id"]
     )

@@ -1,7 +1,7 @@
 from flask import Flask, request
 import googleapiclient.errors
 import webhook
-from classroom import Classroom
+from classroom import Classroom, return_details_from_request
 from db import dbHelper, create
 import json
 from base64 import b64decode
@@ -17,17 +17,17 @@ def pubsub():
     data = request.json
     print(data)
     data = json.loads(b64decode(data["message"]["data"]))
+    room = Classroom.from_classId(data["resourceId"]["courseId"], db)
 
     if con := db.find_connection_by_class_id(classId=data["resourceId"]["courseId"]):
         to = con.get_webhook_url()
     else:
-        room = Classroom.from_classId(data["resourceId"]["courseId"], db)
 
         room.deregister_id(data["resourceId"]["courseId"])
     ##allows for possible attack here TODO implement auth with pubsub
 
     try:
-        d = classroom.return_details_from_request(data, db)
+        d = return_details_from_request(data, db, room)
     except googleapiclient.errors.HttpError:
         webhook.send_raw(to, "Some update but 404 happened check classroom manually")
         return "", 200
