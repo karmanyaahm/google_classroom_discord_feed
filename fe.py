@@ -15,7 +15,6 @@ from flask_login import (
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import os
-from werkzeug.contrib.fixers import ProxyFix
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
@@ -25,7 +24,6 @@ os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "true"
 app = Flask(__name__)
 
 app.secret_key = secret_key
-app.wsgi_app = ProxyFix(app.wsgi_app)
 app = ProxyFix(app, x_for=1, x_host=1)
 
 db = dbHelper(app)
