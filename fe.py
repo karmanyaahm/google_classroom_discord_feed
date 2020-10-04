@@ -15,12 +15,18 @@ from flask_login import (
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import os
+from werkzeug.contrib.fixers import ProxyFix
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "true"
 
 
 app = Flask(__name__)
+
 app.secret_key = secret_key
+app.wsgi_app = ProxyFix(app.wsgi_app)
+app = ProxyFix(app, x_for=1, x_host=1)
 
 db = dbHelper(app)
 
@@ -38,16 +44,15 @@ def load_user(u):
 def root():
     return render_template("index.html")
 
+def httpsit(st):
+    return redirect("https://" + st.split("://")[1])
 
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return redirect(httpsit(request.host_url))
+    return redirect('/')
 
-
-def httpsit(st):
-    return redirect("https://" + st.split("://")[1])
 
 
 @app.route("/login")
@@ -55,7 +60,7 @@ def login():
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         "credentials_new.json", scopes=scopes
     )
-    flow.redirect_uri = httpsit(request.base_url) + "/callback"
+    flow.redirect_uri = request.base_url+ "/callback"
     authorization_url, state = flow.authorization_url(
         access_type="offline",
     )
@@ -78,7 +83,7 @@ def callback():
 
     user = add_or_update_user(credentials, db)
     login_user(user)
-    return redirect(httpsit(request.host_url)[:-1] + "/edit")
+    return redirect( "/edit")
 
 
 @app.route("/edit", methods=["GET", "POST"])
@@ -112,7 +117,7 @@ def edit_page():
                     uid=uid, classId=c["id"], webhook=request.form["url-" + idd], db=db
                 )
 
-        return redirect(httpsit(request.host_url)[:-1] + "/edit")
+        return redirect( "/edit")
 
     return render_template("edit.html", classes=classes)
 
