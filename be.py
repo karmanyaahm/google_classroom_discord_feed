@@ -14,10 +14,11 @@ db = dbHelper(app)
 
 @app.route("/goog", methods=["POST"])
 def pubsub():
-    classroom = Classroom.from_classId(data["resourceId"]["courseId"], db)
     data = request.json
     print(data)
     data = json.loads(b64decode(data["message"]["data"]))
+    classroom = Classroom.from_classId(data["resourceId"]["courseId"], db)
+
     if con := db.find_connection_by_class_id(classId=data["resourceId"]["courseId"]):
         to = con.get_webhook_url()
     else:
