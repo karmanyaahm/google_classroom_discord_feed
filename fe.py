@@ -78,7 +78,7 @@ def callback():
 
     user = add_or_update_user(credentials, db)
     login_user(user)
-    return httpsit(request.host_url) + "/edit"
+    return httpsit(request.host_url)[:-1] + "/edit"
 
 
 @app.route("/edit", methods=["GET", "POST"])
@@ -112,7 +112,7 @@ def edit_page():
                     uid=uid, classId=c["id"], webhook=request.form["url-" + idd], db=db
                 )
 
-        return httpsit(request.host_url) + "/edit"
+        return httpsit(request.host_url)[:-1] + "/edit"
 
     return render_template("edit.html", classes=classes)
 
