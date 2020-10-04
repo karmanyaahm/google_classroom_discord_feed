@@ -43,7 +43,7 @@ def root():
 @login_required
 def logout():
     logout_user()
-    return httpsit(request.host_url) + '/'
+    return httpsit(request.host_url) 
 
 
 def httpsit(st):
