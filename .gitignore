@@ -1,4 +1,4 @@
-credentials.json
+credentials*.json
 token.pickle
 secret.py
 out.txt

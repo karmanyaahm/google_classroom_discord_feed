@@ -1,46 +1,86 @@
 import db
-from constants import parsetime, clean_webhook_url
+from constants import parsetime, clean_webhook_url, scopes
 from flask import Flask, request, render_template, redirect, url_for
 from classroom import Classroom
-from db import dbHelper
+from db import dbHelper, Connection
+from fe_managers import *
+from secret import secret_key
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
+import google.oauth2.credentials
+import google_auth_oauthlib.flow
+import os
+
+os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "true"
+
 
 app = Flask(__name__)
+app.secret_key = secret_key
+
 db = dbHelper(app)
 
 
-def new_connection(uid, classId, webhookUrl, db):
-    regId, time = Classroom.from_uid(uid, db).register(classId)
+login_manager = LoginManager()
+login_manager.init_app(app)
 
-    webhookId, webhookToken = clean_webhook_url(webhookUrl)
-    con = Connection(
-        uid=uid,
-        classId=classId,
-        webhookId=webhookId,
-        webhookToken=webhookToken,
-        registration=regId,
-        expire=parsetime(time),
+
+@login_manager.user_loader
+def load_user(u):
+    return db.find_user_by_id(u)  # should return none if none
+
+@app.route("/")
+def root():
+    return render_template('index.html')
+
+    
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect('/')
+
+
+@app.route("/login")
+def login():
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        "credentials_new.json", scopes=scopes
     )
-    db.add(con)
+    flow.redirect_uri = request.base_url + "/callback"
+    authorization_url, state = flow.authorization_url(
+        access_type="offline",
+    )
+    return redirect(authorization_url)
+
+    ##TODO security: implement state for csrf etc
 
 
-def delete_connection(classId, db, classroom):
-    con = db.find_connection_by_class_id(classId)
-    classroom.deregister(con)
-    db.delete(con)
+@app.route("/login/callback")
+def callback():
+    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
+        "credentials_new.json", scopes=scopes
+    )
+    flow.redirect_uri = request.base_url
 
+    authorization_response = request.url
+    flow.fetch_token(authorization_response=authorization_response)
 
-def modify_or_add_connection():
-    pass
+    credentials = flow.credentials
 
-
-def new_user():
-    return
+    user = add_or_update_user(credentials, db)
+    login_user(user)
+    return redirect(url_for("edit_page"))
 
 
 @app.route("/edit", methods=["GET", "POST"])
+@login_required
 def edit_page():
-
-    room = Classroom.from_uid(69, db)
+    uid = current_user.uid
+    room = Classroom.from_uid(uid, db)
     classes = [
         {
             "name": c["name"],
@@ -60,16 +100,17 @@ def edit_page():
             idd = c["id"]
 
             if request.form.get("delete-" + idd):
-                delete_connection(classid=idd, db=db, classroom=room)
+                delete_connection(classId=idd, db=db, classroom=room)
 
             if request.form["url-" + idd] != c["webhook"]:
                 modify_or_add_connection(
-                    classId=c["id"], webhook=request.form["url-" + idd]
+                    uid=uid, classId=c["id"], webhook=request.form["url-" + idd], db=db
                 )
 
-        return redirect(url_for(edit_page))
+        return redirect(url_for("edit_page"))
 
     return render_template("edit.html", classes=classes)
 
 
-app.run(debug=True, port=4000)
+if __name__ == "__main__":
+    app.run(debug=True, port=4000, ssl_context="adhoc")

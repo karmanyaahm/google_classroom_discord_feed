@@ -7,8 +7,25 @@ db = SQLAlchemy()
 
 
 class User(db.Model):
-    uid = Column(Integer, primary_key=True)
+    uid = Column(String(255), primary_key=True)
     token = Column("token", PickleType(protocol=4))
+
+    def is_authenticated(self):
+        try:
+            return self.token and self.token.valid
+        except:
+            return False
+
+    def is_active(self):
+        return True  ###TODO Look at this
+
+    def is_anonymous(self):
+        if uid:
+            return False
+        return True
+
+    def get_id(self):
+        return self.uid
 
     def __repr__(self):
         return "<User %r>" % self.uid
@@ -16,7 +33,7 @@ class User(db.Model):
 
 class Connection(db.Model):
 
-    uid = Column(Integer)
+    uid = Column(String(255))
     classId = Column(String(50), primary_key=True)
     webhookId = Column(String(50))
     webhookToken = Column(String(120))
@@ -59,6 +76,9 @@ class dbHelper:
         session = self.db.session  ###!!!!!!!! maybe self.db here
         session.delete(o)
         session.commit()
+
+    def commit_modification(self):
+        self.db.session.commit()
 
     def find_connection_by_class_id(self, classId):
         return Connection.query.filter_by(classId=classId).first()

@@ -6,12 +6,7 @@ import constants
 
 
 # If modifying these scopes, delete the file token.pickle.
-SCOPES = [
-    "https://www.googleapis.com/auth/classroom.push-notifications",
-    "https://www.googleapis.com/auth/classroom.coursework.students.readonly",
-    "https://www.googleapis.com/auth/classroom.announcements.readonly",
-    "https://www.googleapis.com/auth/classroom.courses.readonly",
-]
+SCOPES = constants.scopes
 
 
 def get_creds(uid, db):
@@ -20,6 +15,8 @@ def get_creds(uid, db):
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
+            db.find_user_by_id(uid).token = creds
+            db.commit_modification()
         else:
             flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
             creds = flow.run_local_server(port=0)
@@ -53,11 +50,14 @@ class Classroom:
 
     def register(self, courseId):
         body = constants.registration_body(courseId)
-        o = self.service.registration.create(body=body)
+        o = self.service.registrations().create(body=body).execute()
         return o["registrationId"], o["expiryTime"]
 
     def deregister(self, con):
-        self.service.registrations.delete(registrationId=con.registration)
+        self.service.registrations().delete(registrationId=con.registration).execute()
+
+    def deregister_id(self, id):
+        self.service.registrations().delete(registrationId=id).execute()
 
     def get_courseWork(self, courseId, thingId):
         return (
@@ -68,4 +68,4 @@ class Classroom:
         )
 
     def get_courses(self):
-        return self.service.courses().list().execute()["courses"]
+        return self.service.courses().list(courseStates='ACTIVE').execute()["courses"]

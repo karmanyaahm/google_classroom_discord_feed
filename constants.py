@@ -3,6 +3,16 @@ import re
 import datetime
 
 
+scopes = [
+    "https://www.googleapis.com/auth/classroom.push-notifications",
+    "https://www.googleapis.com/auth/classroom.coursework.students.readonly",  # for classes you teach
+    "https://www.googleapis.com/auth/classroom.coursework.me.readonly",  ## for classes you don't teach
+    "https://www.googleapis.com/auth/classroom.announcements.readonly",
+    "https://www.googleapis.com/auth/classroom.courses.readonly",
+    "openid",
+]
+
+
 def registration_body(courseId: str):
     return {  # An instruction to Classroom to send notifications from the `feed` to the
         # provided destination.
@@ -23,23 +33,18 @@ def parsetime(time):
     return datetime.datetime.strptime(time[:-5], "%Y-%m-%dT%H:%M:%S")
 
 
-
-
-
-
-
-
-
-
-
-
-
 r = "https://discordapp.com/api/webhooks/(.*?)/(.*)"
+
+
 class WrongUrlEnteredException(Exception):
     pass
+
+
 ree = re.compile(r, re.IGNORECASE)
+
+
 def clean_webhook_url(url):
     try:
-        return ree.match(s.strip()).group(1, 2)
+        return ree.match(url.strip()).group(1, 2)
     except IndexError:
         raise WrongUrlEnteredException
