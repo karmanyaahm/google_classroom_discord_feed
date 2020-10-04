@@ -42,8 +42,7 @@ def load_user(u):
 def root():
     return render_template("index.html")
 
-def httpsit(st):
-    return redirect("https://" + st.split("://")[1])
+
 
 @app.route("/logout")
 @login_required
@@ -72,9 +71,9 @@ def callback():
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         "credentials_new.json", scopes=scopes
     )
-    flow.redirect_uri = httpsit(request.base_url)
+    flow.redirect_uri = request.base_url
 
-    authorization_response = httpsit(request.url)
+    authorization_response = request.url
     flow.fetch_token(authorization_response=authorization_response)
 
     credentials = flow.credentials
