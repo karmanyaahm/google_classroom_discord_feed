@@ -45,13 +45,14 @@ def logout():
     logout_user()
     return redirect("/")
 
-
+def httpsit(st):
+    return 'https://'+st.split('://')[1]
 @app.route("/login")
 def login():
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         "credentials_new.json", scopes=scopes
     )
-    flow.redirect_uri = request.base_url + "/callback"
+    flow.redirect_uri = httpsit(request.base_url)+ "/callback"
     authorization_url, state = flow.authorization_url(
         access_type="offline",
     )
@@ -65,16 +66,16 @@ def callback():
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         "credentials_new.json", scopes=scopes
     )
-    flow.redirect_uri = request.base_url
+    flow.redirect_uri = httpsit(request.base_url)
 
-    authorization_response = request.url
+    authorization_response = httpsit(request.url)
     flow.fetch_token(authorization_response=authorization_response)
 
     credentials = flow.credentials
 
     user = add_or_update_user(credentials, db)
     login_user(user)
-    return redirect(url_for("edit_page"))
+    return redirect('/edit')
 
 
 @app.route("/edit", methods=["GET", "POST"])
@@ -108,7 +109,7 @@ def edit_page():
                     uid=uid, classId=c["id"], webhook=request.form["url-" + idd], db=db
                 )
 
-        return redirect(url_for("edit_page"))
+        return redirect('/edit')
 
     return render_template("edit.html", classes=classes)
 
