@@ -24,13 +24,13 @@ os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "true"
 app = Flask(__name__)
 
 app.secret_key = secret_key
-app = ProxyFix(app, x_for=1, x_host=1)
 
 db = dbHelper(app)
 
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+app = ProxyFix(app, x_for=1, x_host=1)
 
 
 @login_manager.user_loader
