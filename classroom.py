@@ -9,6 +9,10 @@ import constants
 SCOPES = constants.scopes
 
 
+class LoginError(Exception):
+    pass
+
+
 def get_creds(uid, db):
     creds = db.find_user_by_id(uid).token
     # If there are no (valid) credentials available, let the user log in.
@@ -18,12 +22,8 @@ def get_creds(uid, db):
             db.find_user_by_id(uid).token = creds
             db.commit_modification()
         else:
-            flow = InstalledAppFlow.from_client_secrets_file("credentials.json", SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        # with open("token.pickle", "wb") as token:
-        #     pickle.dump(creds, token)
-        ## TODO: replace
+            raise LoginError
+
 
     return creds
 

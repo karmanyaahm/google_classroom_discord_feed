@@ -17,15 +17,19 @@ def pubsub():
     data = request.json
     print(data)
     regid = data['message']['attributes']["registrationId"]
+    print(data)
     data = json.loads(b64decode(data["message"]["data"]))
-    room = Classroom.from_classId(data["resourceId"]["courseId"], db)
 
     if con := db.find_connection_by_class_id(classId=data["resourceId"]["courseId"]):
         to = con.get_webhook_url()
     else:
         room.deregister_id(regid)
     ##allows for possible attack here TODO implement auth with pubsub
-
+    try:
+        room = Classroom.from_classId(data["resourceId"]["courseId"], db)
+    except LoginError:
+        raise Exception #TODO handle this
+ 
     try:
         d = return_details_from_request(data, db, room)
     except googleapiclient.errors.HttpError:

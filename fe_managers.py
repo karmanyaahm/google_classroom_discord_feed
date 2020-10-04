@@ -23,9 +23,9 @@ def add_or_update_user(creds, db):
     url = "https://openidconnect.googleapis.com/v1/userinfo"
     head = {"Authorization": "Bearer " + creds.token}
     response = requests.get(url, headers=head)
-    id = response.json()["sub"]
-    user = User(uid=id, token=creds)
-    if a := db.find_user_by_id(id):
+    idd = response.json()["sub"]
+    user = User(uid=idd, token=creds)
+    if (a := db.find_user_by_id(idd) )and creds.refresh_token:
         a.token = creds
         user = a
         db.commit_modification()
