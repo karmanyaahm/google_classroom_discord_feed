@@ -43,13 +43,11 @@ def root():
     return render_template("index.html")
 
 
-
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return redirect('/')
-
+    return redirect("/")
 
 
 @app.route("/login")
@@ -57,7 +55,7 @@ def login():
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         "credentials_new.json", scopes=scopes
     )
-    flow.redirect_uri = request.base_url+ "/callback"
+    flow.redirect_uri = request.base_url + "/callback"
     authorization_url, state = flow.authorization_url(
         access_type="offline",
     )
@@ -80,7 +78,7 @@ def callback():
 
     user = add_or_update_user(credentials, db)
     login_user(user)
-    return redirect( "/edit")
+    return redirect("/edit")
 
 
 @app.route("/edit", methods=["GET", "POST"])
@@ -114,7 +112,7 @@ def edit_page():
                     uid=uid, classId=c["id"], webhook=request.form["url-" + idd], db=db
                 )
 
-        return redirect( "/edit")
+        return redirect("/edit")
 
     return render_template("edit.html", classes=classes)
 
@@ -122,5 +120,10 @@ def edit_page():
 if __name__ == "__main__":
     app.run(
         debug=True,
-        port=50004,
+        port=4000,
+        ssl_context="adhoc",
     )
+    # app.run(
+    #     debug=True,
+    #     port=50004,
+    # )

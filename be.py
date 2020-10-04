@@ -16,20 +16,20 @@ db = dbHelper(app)
 def pubsub():
     data = request.json
     print(data)
+    regid = data['message']['attributes']["registrationId"]
     data = json.loads(b64decode(data["message"]["data"]))
     room = Classroom.from_classId(data["resourceId"]["courseId"], db)
 
     if con := db.find_connection_by_class_id(classId=data["resourceId"]["courseId"]):
         to = con.get_webhook_url()
     else:
-
-        room.deregister_id(data["resourceId"]["courseId"])
+        room.deregister_id(regid)
     ##allows for possible attack here TODO implement auth with pubsub
 
     try:
         d = return_details_from_request(data, db, room)
     except googleapiclient.errors.HttpError:
-        webhook.send_raw(to, "Some update but 404 happened check classroom manually")
+        webhook.send_raw(to, "Some update but error happened check classroom manually")
         return "", 200
     webhook.received_stuff(to, d, status=data["eventType"])
     return "", 200

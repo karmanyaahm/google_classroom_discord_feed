@@ -28,7 +28,7 @@ def get_creds(uid, db):
     return creds
 
 
-def return_details_from_request(r, db,room):
+def return_details_from_request(r, db, room):
     return room.get_courseWork(
         courseId=r["resourceId"]["courseId"], thingId=r["resourceId"]["id"]
     )
@@ -50,6 +50,7 @@ class Classroom:
     def register(self, courseId):
         body = constants.registration_body(courseId)
         o = self.service.registrations().create(body=body).execute()
+        print(o)
         return o["registrationId"], o["expiryTime"]
 
     def deregister(self, con):
@@ -67,4 +68,4 @@ class Classroom:
         )
 
     def get_courses(self):
-        return self.service.courses().list(courseStates='ACTIVE').execute()["courses"]
+        return self.service.courses().list(courseStates="ACTIVE").execute()["courses"]
