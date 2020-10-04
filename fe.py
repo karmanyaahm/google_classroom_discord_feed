@@ -33,16 +33,17 @@ login_manager.init_app(app)
 def load_user(u):
     return db.find_user_by_id(u)  # should return none if none
 
+
 @app.route("/")
 def root():
-    return render_template('index.html')
+    return render_template("index.html")
 
-    
+
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return redirect('/')
+    return redirect("/")
 
 
 @app.route("/login")
@@ -113,4 +114,7 @@ def edit_page():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=4000, ssl_context="adhoc")
+    app.run(
+        debug=True,
+        port=50004,
+    )

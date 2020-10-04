@@ -1,7 +1,7 @@
 from flask import Flask, request
 import googleapiclient.errors
 import webhook
-import classroom
+from classroom import Classroom
 from db import dbHelper, create
 import json
 from base64 import b64decode
@@ -14,7 +14,7 @@ db = dbHelper(app)
 
 @app.route("/goog", methods=["POST"])
 def pubsub():
-    ###create classroom?
+    classroom = Classroom.from_classId(data["resourceId"]["courseId"], db)
     data = request.json
     print(data)
     data = json.loads(b64decode(data["message"]["data"]))
@@ -33,9 +33,7 @@ def pubsub():
     return "", 200
 
 
-# TODO: acknowledge annoucnments even if not post them
 # TODO: look at announments
 # TODO: error handling
-# TODO: clean up if stray registration messages arrive
 
 app.run(debug=False, port=50005)
