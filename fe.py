@@ -15,13 +15,14 @@ from flask_login import (
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import os
-from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_behind_proxy import FlaskBehindProxy
 
 
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "true"
 
 
 app = Flask(__name__)
+proxied = FlaskBehindProxy(app)
 
 app.secret_key = secret_key
 
@@ -30,7 +31,6 @@ db = dbHelper(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-app = ProxyFix(app, x_for=1, x_host=1)
 
 
 @login_manager.user_loader
