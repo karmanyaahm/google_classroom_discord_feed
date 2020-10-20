@@ -16,7 +16,7 @@ import google.oauth2.credentials
 import google_auth_oauthlib.flow
 import os
 from flask_behind_proxy import FlaskBehindProxy
-
+import errors
 
 os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "true"
 
@@ -58,6 +58,7 @@ def login():
     flow.redirect_uri = request.base_url + "/callback"
     authorization_url, state = flow.authorization_url(
         access_type="offline",
+        include_granted_scopes="true",
     )
     return redirect(authorization_url)
 
@@ -72,7 +73,11 @@ def callback():
     flow.redirect_uri = request.base_url
 
     authorization_response = request.url
+
     flow.fetch_token(authorization_response=authorization_response)
+    if not set(flow.oauth2session.token.scopes).issuperset(set(scopes)):
+        print(set(flow.oauth2session.token.scopes).symmetric_difference(set(scopes)))
+        return render_template("error.html", error=errors.LoginScopeError.message)
 
     credentials = flow.credentials
 
@@ -108,10 +113,16 @@ def edit_page():
                 delete_connection(classId=idd, db=db, classroom=room)
 
             if request.form["url-" + idd] != c["webhook"]:
-                modify_or_add_connection(
-                    uid=uid, classId=c["id"], webhook=request.form["url-" + idd], db=db
-                )
-
+                try:
+                    modify_or_add_connection(
+                        uid=uid,
+                        classId=c["id"],
+                        webhook=request.form["url-" + idd],
+                        db=db,
+                        classroom=room,
+                    )
+                except errors.PrintMessageException as e:
+                    return render_template("error.html", error=e.message)
         return redirect("/edit")
 
     return render_template("edit.html", classes=classes)
@@ -121,9 +132,10 @@ if __name__ == "__main__":
     app.run(
         debug=True,
         port=4000,
-        ssl_context="adhoc",
+        ssl_context=("cert.pem", "key.pem"), #openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
+
     )
-    # app.run(
-    #     debug=True,
-    #     port=50004,
-    # )
+# app.run(
+#     debug=True,
+#     port=50004,
+# )

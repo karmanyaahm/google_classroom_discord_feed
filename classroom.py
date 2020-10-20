@@ -1,16 +1,18 @@
 from __future__ import print_function
 from googleapiclient.discovery import build
+import googleapiclient.errors as gexcept
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import constants
+import errors
+
 
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = constants.scopes
 
 
-class LoginError(Exception):
-    pass
+
 
 
 def get_creds(uid, db):
@@ -22,7 +24,7 @@ def get_creds(uid, db):
             db.find_user_by_id(uid).token = creds
             db.commit_modification()
         else:
-            raise LoginError
+            raise errors.LoginError
 
 
     return creds
@@ -49,7 +51,13 @@ class Classroom:
 
     def register(self, courseId):
         body = constants.registration_body(courseId)
-        o = self.service.registrations().create(body=body).execute()
+        try:
+            o = self.service.registrations().create(body=body).execute()
+        except gexcept.HttpError as e:
+            if int(e.resp['status']) == 403:
+                raise errors.ClassStudentException from e
+            else:
+                raise
         print(o)
         return o["registrationId"], o["expiryTime"]
 

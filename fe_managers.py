@@ -25,10 +25,12 @@ def add_or_update_user(creds, db):
     response = requests.get(url, headers=head)
     idd = response.json()["sub"]
     user = User(uid=idd, token=creds)
-    if (a := db.find_user_by_id(idd) )and creds.refresh_token:
-        a.token = creds
-        user = a
-        db.commit_modification()
+    if (a := db.find_user_by_id(idd)) :
+        if creds.refresh_token:
+            a.token = creds
+            user = a
+            db.commit_modification()
+        ##or just log in
     else:
         db.add(user)
     return user
@@ -44,7 +46,7 @@ def modify_connection(classId, webhookUrl, db):
     db.commit_modification()
 
 
-def modify_or_add_connection(uid, classId, webhook, db):
+def modify_or_add_connection(uid, classId, webhook, db,classroom):
     if a := db.find_connection_by_class_id(classId):
         modify_connection(classId, webhook, db)
     else:

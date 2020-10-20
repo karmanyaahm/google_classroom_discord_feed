@@ -1,16 +1,14 @@
 import secret
 import re
 import datetime
-
+from errors import WrongUrlEnteredException
 
 scopes = [
     "https://www.googleapis.com/auth/classroom.push-notifications",
-    "https://www.googleapis.com/auth/classroom.coursework.students.readonly",  # for classes you teach
-    "https://www.googleapis.com/auth/classroom.coursework.me.readonly",  ## for classes you don't teach
+    "https://www.googleapis.com/auth/classroom.student-submissions.students.readonly",  # "https://www.googleapis.com/auth/classroom.coursework.students.readonly",
     "https://www.googleapis.com/auth/classroom.announcements.readonly",
     "https://www.googleapis.com/auth/classroom.courses.readonly",
     "https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly",
-    "https://www.googleapis.com/auth/classroom.topics.readonly",
     "openid",
 ]
 
@@ -38,14 +36,12 @@ def parsetime(time):
 r = "https://discordapp.com/api/webhooks/(.*?)/(.*)"
 
 
-class WrongUrlEnteredException(Exception):
-    pass
-
-
 ree = re.compile(r, re.IGNORECASE)
 
 
 def clean_webhook_url(url):
+    if url == "" or not url:
+        raise WrongUrlEnteredException
     try:
         return ree.match(url.strip()).group(1, 2)
     except IndexError:
