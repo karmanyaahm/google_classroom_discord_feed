@@ -16,7 +16,8 @@ class LoginError(PrintMessageException):
 
 class LoginScopeError(LoginError):
     message = "Please give all permissions when logging in and try logging in again"
-
+class CannotRefreshToken(LoginError):
+    message = "Something wrong cannot refresh token contact someone for help"
 
 class LoginErrorold(Exception):
     pass

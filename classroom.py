@@ -14,8 +14,8 @@ SCOPES = constants.scopes
 def get_creds(uid, db):
     creds = db.find_user_by_id(uid).token
     # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
+    if not creds.valid:
+        if creds.refresh_token:
             creds.refresh(Request())
             db.find_user_by_id(uid).token = creds
             db.commit_modification()
@@ -27,13 +27,13 @@ def get_creds(uid, db):
 def creds_from_user(user, db):
     creds = user.token
 
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
+    if not creds.valid:
+        if creds.refresh_token:
             creds.refresh(Request())
             user.token = creds
             db.commit_modification()
         else:
-            raise errors.LoginErrorold
+            raise errors.CannotRefreshToken
     return creds
 
 
