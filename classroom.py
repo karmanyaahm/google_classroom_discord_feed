@@ -46,7 +46,7 @@ class Classroom:
         return clas(build("classroom", "v1", credentials=get_creds(uid, db)))
 
     @classmethod
-    def from_user(clas, user):
+    def from_user(clas, user,db):
         return clas(build("classroom", "v1", credentials=creds_from_user(user, db)))
 
     def register(self, courseId):

@@ -22,7 +22,7 @@ def pubsub():
 
     if cons := db.find_connections_by_class_id(classId=data["resourceId"]["courseId"]):
         for con in cons:
-            room = Classroom.from_user(con.user)
+            room = Classroom.from_user(con.user,db)
             to = con.get_webhook_url()
             try:
                 d = room.get_courseWork(
