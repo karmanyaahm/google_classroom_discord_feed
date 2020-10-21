@@ -23,7 +23,7 @@ class User(db.Model):
     token = Column("token", PickleType(protocol=4))
     connections = relationship("Connection", back_populates="user")
 
-    def get_class(self,classId):
+    def get_class(self, classId):
         for c in self.connections:
             if c.classId == classId:
                 return c
@@ -52,20 +52,20 @@ class User(db.Model):
 
 class Connection(db.Model):
     __tablename__ = "connection"
+    id = Column(Integer, primary_key=True)
     uid = Column(String(255), ForeignKey("user.uid"))
-    classId = Column(String(50), primary_key=True)
-    webhookId = Column(String(50))
+    classId = Column("class_id", String(50))
+    webhookId = Column("webhook_id", String(50))
     webhookToken = Column(String(120))
     registration = Column(String(50))
     expire = Column(DateTime)
     user = relationship("User", back_populates="connections")
-    __table_args__ = (UniqueConstraint(classId.name, webhookId.name),)
+    __table_args__ = (UniqueConstraint("class_id", "webhook_id"),)
 
     def get_webhook_url(self):
         return (
             f"https://discordapp.com/api/webhooks/{self.webhookId}/{self.webhookToken}"
         )
-    
 
     def __repr__(self):
         return "<Connection %r>" % self.classId
