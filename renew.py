@@ -31,6 +31,6 @@ with app.app_context():
         regId, expTime = room.register(courseId=connection.classId)
         connection.registration = regId
         connection.expire = parsetime(expTime)
-
+        print(regId)
 
     db.commit_modification()
