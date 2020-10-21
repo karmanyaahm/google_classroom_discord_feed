@@ -13,7 +13,7 @@ dataog = {
 
 data = """{"message":{"attributes":{"registrationId":"3338188336727588864"},"data":"eyJjb2xsZWN0aW9uIjoiY291cnNlcy5jb3Vyc2VXb3JrIiwiZXZlbnRUeXBlIjoiTU9ESUZJRUQiLCJyZXNvdXJjZUlkIjp7ImNvdXJzZUlkIjoiMTA0OTUwMTgyOTU0IiwiaWQiOiIxNzY4MzI0NDU2NTEifX0=","messageId":"1592321181222643","message_id":"1592321181222643","publishTime":"2020-10-01T23:52:28.407Z","publish_time":"2020-10-01T23:52:28.407Z"},"subscription":"projects/csclub-281101/subscriptions/topersonalserver"}"""
 data = json.loads(data)
-data["message"]["data"] = base64.b64encode(json.dumps(dataog).encode()).decode()  # to test 404 vs normal
+#data["message"]["data"] = base64.b64encode(json.dumps(dataog).encode()).decode()  # to test 404 vs normal
 
 r = requests.post(
     "http://localhost:50005/goog",

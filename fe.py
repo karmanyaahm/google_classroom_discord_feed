@@ -33,6 +33,11 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+@app.errorhandler(errors.PrintMessageException)
+def handle_exception(e):
+    return render_template("error.html", error=e.message)
+
+
 @login_manager.user_loader
 def load_user(u):
     return db.find_user_by_id(u)  # should return none if none
@@ -96,9 +101,7 @@ def edit_page():
             "name": c["name"],
             "id": c["id"],
             "webhook": (
-                a.get_webhook_url()
-                if (a := db.find_connection_by_class_id(c["id"]))
-                else ""
+                a.get_webhook_url() if (a := current_user.get_class(c["id"])) else ""
             ),
         }
         for c in room.get_courses()
@@ -113,29 +116,29 @@ def edit_page():
                 delete_connection(classId=idd, db=db, classroom=room)
 
             if request.form["url-" + idd] != c["webhook"]:
-                try:
-                    modify_or_add_connection(
-                        uid=uid,
-                        classId=c["id"],
-                        webhook=request.form["url-" + idd],
-                        db=db,
-                        classroom=room,
-                    )
-                except errors.PrintMessageException as e:
-                    return render_template("error.html", error=e.message)
+                modify_or_add_connection(
+                    uid=uid,
+                    classId=c["id"],
+                    webhook=request.form["url-" + idd],
+                    db=db,
+                    classroom=room,
+                )
         return redirect("/edit")
 
     return render_template("edit.html", classes=classes)
 
 
 if __name__ == "__main__":
+    # app.run(
+    #     debug=True,
+    #     port=4000,
+    #     ssl_context=(
+    #         "cert.pem",
+    #         "key.pem",
+    #     ),  # openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
+    # )
     app.run(
         debug=True,
-        port=4000,
-        ssl_context=("cert.pem", "key.pem"), #openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365
-
+        port=50004,
     )
-# app.run(
-#     debug=True,
-#     port=50004,
-# )
+ 

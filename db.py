@@ -1,14 +1,33 @@
-from sqlalchemy import Column, Integer, String, PickleType, DateTime, create_engine
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    PickleType,
+    DateTime,
+    create_engine,
+    ForeignKey,
+    UniqueConstraint,
+)
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from secret import sqlurl
 from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 db = SQLAlchemy()
 
 
 class User(db.Model):
+    __tablename__ = "user"
     uid = Column(String(255), primary_key=True)
     token = Column("token", PickleType(protocol=4))
+    connections = relationship("Connection", back_populates="user")
+
+    def get_class(self,classId):
+        for c in self.connections:
+            if c.classId == classId:
+                return c
+        return None
 
     def is_authenticated(self):
         try:
@@ -32,18 +51,21 @@ class User(db.Model):
 
 
 class Connection(db.Model):
-
-    uid = Column(String(255))
+    __tablename__ = "connection"
+    uid = Column(String(255), ForeignKey("user.uid"))
     classId = Column(String(50), primary_key=True)
     webhookId = Column(String(50))
     webhookToken = Column(String(120))
     registration = Column(String(50))
     expire = Column(DateTime)
+    user = relationship("User", back_populates="connections")
+    __table_args__ = (UniqueConstraint(classId.name, webhookId.name),)
 
     def get_webhook_url(self):
         return (
             f"https://discordapp.com/api/webhooks/{self.webhookId}/{self.webhookToken}"
         )
+    
 
     def __repr__(self):
         return "<Connection %r>" % self.classId
@@ -80,8 +102,15 @@ class dbHelper:
     def commit_modification(self):
         self.db.session.commit()
 
-    def find_connection_by_class_id(self, classId):
-        return Connection.query.filter_by(classId=classId).first()
+    def find_connections_by_class_id(self, classId):
+        return Connection.query.filter_by(classId=classId).all()
 
     def find_user_by_id(self, id):
         return User.query.filter_by(uid=id).first()
+
+    def find_connection_by_expire(self, end: datetime, start: datetime = None):
+        if not start:
+            return Connection.query.filter(Connection.expire <= end).all()
+        return Connection.query.filter(
+            Connection.expire >= start, Connection.expire <= end
+        ).all()

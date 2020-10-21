@@ -10,8 +10,13 @@ class WrongUrlEnteredException(PrintMessageException):
     message = "Invalid URL entered for the Discord URL"
 
 
-class LoginScopeError(PrintMessageException):
+class LoginError(PrintMessageException):
+    message = "something wrong with login. Please try again"
+
+
+class LoginScopeError(LoginError):
     message = "Please give all permissions when logging in and try logging in again"
 
-class LoginError(Exception):
+
+class LoginErrorold(Exception):
     pass

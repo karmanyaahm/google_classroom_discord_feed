@@ -44,5 +44,5 @@ def clean_webhook_url(url):
         raise WrongUrlEnteredException
     try:
         return ree.match(url.strip()).group(1, 2)
-    except IndexError:
+    except (IndexError, AttributeError):
         raise WrongUrlEnteredException

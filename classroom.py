@@ -7,12 +7,8 @@ import constants
 import errors
 
 
-
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = constants.scopes
-
-
-
 
 
 def get_creds(uid, db):
@@ -24,16 +20,21 @@ def get_creds(uid, db):
             db.find_user_by_id(uid).token = creds
             db.commit_modification()
         else:
-            raise errors.LoginError
-
-
+            raise errors.LoginErrorold
     return creds
 
 
-def return_details_from_request(r, db, room):
-    return room.get_courseWork(
-        courseId=r["resourceId"]["courseId"], thingId=r["resourceId"]["id"]
-    )
+def creds_from_user(user, db):
+    creds = user.token
+
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+            user.token = creds
+            db.commit_modification()
+        else:
+            raise errors.LoginErrorold
+    return creds
 
 
 class Classroom:
@@ -45,16 +46,15 @@ class Classroom:
         return clas(build("classroom", "v1", credentials=get_creds(uid, db)))
 
     @classmethod
-    def from_classId(clas, courseId, db):
-        uid = db.find_connection_by_class_id(courseId).uid
-        return clas.from_uid(uid, db)
+    def from_user(clas, user):
+        return clas(build("classroom", "v1", credentials=creds_from_user(user, db)))
 
     def register(self, courseId):
         body = constants.registration_body(courseId)
         try:
             o = self.service.registrations().create(body=body).execute()
         except gexcept.HttpError as e:
-            if int(e.resp['status']) == 403:
+            if int(e.resp["status"]) == 403:
                 raise errors.ClassStudentException from e
             else:
                 raise
