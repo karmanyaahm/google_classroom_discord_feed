@@ -7,9 +7,10 @@ from flask_login import current_user
 
 
 def new_connection(uid, classId, webhookUrl, db):
+    webhookId, webhookToken = clean_webhook_url(webhookUrl)
+
     regId, time = Classroom.from_uid(uid, db).register(classId)
 
-    webhookId, webhookToken = clean_webhook_url(webhookUrl)
     con = Connection(
         uid=uid,
         classId=classId,

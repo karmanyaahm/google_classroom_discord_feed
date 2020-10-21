@@ -103,10 +103,10 @@ class dbHelper:
         self.db.session.commit()
 
     def find_connections_by_class_id(self, classId):
-        return Connection.query.filter_by(classId=classId).all()
+        return Connection.query.filter(Connection.classId == classId).all()
 
     def find_user_by_id(self, id):
-        return User.query.filter_by(uid=id).first()
+        return User.query.filter(User.uid==id).first()
 
     def find_connection_by_expire(self, end: datetime, start: datetime = None):
         if not start:
